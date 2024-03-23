@@ -6,4 +6,6 @@ package org.galaxy.siriusrpc.demo.api;
  */
 public interface UserService {
     User findById(Integer id);
+
+    int getId(int id);
 }

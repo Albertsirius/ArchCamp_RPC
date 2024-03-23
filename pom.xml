@@ -14,6 +14,7 @@
         <module>siriusrpc-core</module>
         <module>siriusrpc-demo-api</module>
         <module>siriusrpc-demo-provider</module>
+        <module>siriusrpc-demo-consumer</module>
     </modules>
 
     <properties>

@@ -1,0 +1,50 @@
+package org.galaxy.siriusrpc.demo.consumer;
+
+import org.galaxy.siriusrpc.core.annotation.SiriusConsumer;
+import org.galaxy.siriusrpc.core.consumer.ConsumerConfig;
+import org.galaxy.siriusrpc.demo.api.Order;
+import org.galaxy.siriusrpc.demo.api.OrderService;
+import org.galaxy.siriusrpc.demo.api.User;
+import org.galaxy.siriusrpc.demo.api.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
+
+/**
+ * @author AlbertSirius
+ * @since 2024/3/17
+ */
+
+@SpringBootApplication
+@Import({ConsumerConfig.class})
+public class SiriusrpcDemoConsumerApplication {
+
+    @SiriusConsumer
+    UserService userService;
+
+    @SiriusConsumer
+    OrderService orderService;
+
+    @Autowired
+    Demo2 demo2;
+
+    public static void main(String[] args) {
+        SpringApplication.run(SiriusrpcDemoConsumerApplication.class);
+    }
+
+    @Bean
+    public ApplicationRunner consumer_runner() {
+        return x -> {
+            User user = userService.findById(1);
+            System.out.println("RPC result userService.findByid(1) = " + user);
+            Order order = orderService.findById(2);
+            System.out.println("RPC result orderService.findByid(2) = " + order);
+            //Order order404 = orderService.findById(404);
+            //System.out.println("RPC result orderService.findByid(404) = " + order404);
+            demo2.test();
+        };
+    }
+}
