@@ -73,13 +73,15 @@ public class ProviderBootstrap implements ApplicationContextAware {
         Map<String, Object> providers = applicationContext.getBeansWithAnnotation(SiriusProvider.class);
         providers.forEach((x, y) -> System.out.println(x));
         for (Object object : providers.values()) {
-            Class<?> itfer = object.getClass().getInterfaces()[0];
-            Method[] methods = itfer.getMethods();
-            for (Method method : methods) {
-                if (MethodUtils.checkLocalMethod(method)) {
-                    continue;
+            Class<?>[] itfers = object.getClass().getInterfaces();
+            for (Class<?> itfer : itfers) {
+                Method[] methods = itfer.getMethods();
+                for (Method method : methods) {
+                    if (MethodUtils.checkLocalMethod(method)) {
+                        continue;
+                    }
+                    createProvider(itfer, object, method);
                 }
-                createProvider(itfer, object, method);
             }
         }
     }
