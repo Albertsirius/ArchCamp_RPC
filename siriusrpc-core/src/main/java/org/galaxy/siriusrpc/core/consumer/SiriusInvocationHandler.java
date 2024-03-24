@@ -1,6 +1,7 @@
 package org.galaxy.siriusrpc.core.consumer;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import okhttp3.ConnectionPool;
 import okhttp3.MediaType;
@@ -10,8 +11,10 @@ import okhttp3.RequestBody;
 import org.galaxy.siriusrpc.core.api.RpcRequest;
 import org.galaxy.siriusrpc.core.api.RpcResponse;
 import org.galaxy.siriusrpc.core.util.MethodUtils;
+import org.galaxy.siriusrpc.core.util.TypeUtils;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.concurrent.TimeUnit;
@@ -49,8 +52,16 @@ public class SiriusInvocationHandler implements InvocationHandler {
             if (data instanceof JSONObject) {
                 JSONObject jsonObject = (JSONObject) data;
                 return jsonObject.toJavaObject(method.getReturnType());
+            } else if (data instanceof JSONArray jsonArray){
+                Object[] array = jsonArray.toArray();
+                Class<?> componentType = method.getReturnType().getComponentType();
+                Object returnArray = Array.newInstance(componentType, array.length);
+                for (int i = 0; i< array.length; i++) {
+                    Array.set(returnArray, i, array[i]);
+                }
+                return returnArray;
             } else {
-                return data;
+                return TypeUtils.cast(data, method.getReturnType());
             }
         }else {
             Exception exception = rpcResponse.getEx();

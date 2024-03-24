@@ -7,6 +7,7 @@ import org.galaxy.siriusrpc.core.api.RpcRequest;
 import org.galaxy.siriusrpc.core.api.RpcResponse;
 import org.galaxy.siriusrpc.core.meta.ProviderMeta;
 import org.galaxy.siriusrpc.core.util.MethodUtils;
+import org.galaxy.siriusrpc.core.util.TypeUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.util.LinkedMultiValueMap;
@@ -17,6 +18,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -37,7 +39,8 @@ public class ProviderBootstrap implements ApplicationContextAware {
         try {
             ProviderMeta providerMeta = findProviderMeta(providerMetas, methodSign);
             Method method = providerMeta.getMethod();
-            Object result = method.invoke(providerMeta.getServieImpl(), request.getArgs());
+            Object[] args = processArgs(request.getArgs(), method.getParameterTypes());
+            Object result = method.invoke(providerMeta.getServieImpl(), args);
             rpcResponse.setStatus(true);
             rpcResponse.setData(result);
         } catch (InvocationTargetException e) {
@@ -49,6 +52,15 @@ public class ProviderBootstrap implements ApplicationContextAware {
         } finally {
             return rpcResponse;
         }
+    }
+
+    private Object[] processArgs(Object[] args, Class<?>[] parameterTypes) {
+        if (Objects.isNull(args) || args.length == 0) return args;
+        Object[] actuals = new Object[args.length];
+        for (int i = 0; i < args.length; i++) {
+            actuals[i] = TypeUtils.cast(args[i], parameterTypes[i]);
+        }
+        return actuals;
     }
 
     private ProviderMeta findProviderMeta(List<ProviderMeta> providerMetas, String methodSign) {

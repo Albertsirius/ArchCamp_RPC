@@ -12,6 +12,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
+import java.util.Arrays;
+
 /**
  * @author AlbertSirius
  * @since 2024/3/17
@@ -37,15 +39,22 @@ public class SiriusrpcDemoConsumerApplication {
     @Bean
     public ApplicationRunner consumer_runner() {
         return x -> {
-            User user = userService.findById(1);
-            System.out.println("RPC result userService.findById(1) = " + user);
-            User user2 = userService.findById(1, "aa");
-            System.out.println("RPC result userService.findById(1, \"aa\") = " + user2);
+
+            System.out.println("userService.getId(new User(100, \"HZH\")) = " + userService.getId(new User(100, "HZH")));
+            //User user = userService.findById(1);
+            //System.out.println("RPC result userService.findById(1) = " + user);
+            //User user2 = userService.findById(1, "aa");
+            //System.out.println("RPC result userService.findById(1, \"aa\") = " + user2);
             //Order order = orderService.findById(2);
             //System.out.println("RPC result orderService.findByid(2) = " + order);
             //Order order404 = orderService.findById(404);
             //System.out.println("RPC result orderService.findByid(404) = " + order404);
             //demo2.test();
+            System.out.println(" ===> userService.getLongIds()");
+            Arrays.stream(userService.getLongIds()).forEach(System.out::println);
+
+            System.out.println(" ===> userService.getIds(int[])");
+            Arrays.stream(userService.getIds(new int[]{4,5,6})).forEach(System.out::println);
         };
     }
 }

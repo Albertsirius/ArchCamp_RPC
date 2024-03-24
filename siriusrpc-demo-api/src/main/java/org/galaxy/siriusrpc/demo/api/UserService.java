@@ -8,8 +8,16 @@ public interface UserService {
     User findById(int id);
 
     User findById(int id, String name);
-    int getId(int id);
+    long getId(int id);
+
+    long getId(User user);
     String getName();
 
     String getName(int id);
+
+    int[] getIds();
+
+    long[] getLongIds();
+
+    int[] getIds(int[] ids);
 }
