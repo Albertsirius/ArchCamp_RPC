@@ -13,12 +13,27 @@ import org.springframework.stereotype.Component;
 @SiriusProvider
 public class UserServiceImpl implements UserService {
     @Override
-    public User findById(Integer id) {
+    public User findById(int id) {
         return new User(id, "Sirius-" + System.currentTimeMillis());
+    }
+
+    @Override
+    public User findById(int id, String name) {
+        return new User(id, "Sirius-" + name + System.currentTimeMillis());
     }
 
     @Override
     public int getId(int id) {
         return id;
+    }
+
+    @Override
+    public String getName() {
+        return "Sirius";
+    }
+
+    @Override
+    public String getName(int id) {
+        return "Sirius-" + id;
     }
 }

@@ -9,6 +9,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import org.galaxy.siriusrpc.core.api.RpcRequest;
 import org.galaxy.siriusrpc.core.api.RpcResponse;
+import org.galaxy.siriusrpc.core.util.MethodUtils;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
@@ -33,14 +34,13 @@ public class SiriusInvocationHandler implements InvocationHandler {
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 
-        String name = method.getName();//TODO
-        if (name.equals("toString") || name.equals("hashCode")) {
+        if (MethodUtils.checkLocalMethod(method.getName())) {
             return null;
         }
 
         RpcRequest rpcRequest = new RpcRequest();
         rpcRequest.setService(service.getCanonicalName());
-        rpcRequest.setMethod(method.getName());
+        rpcRequest.setMethodSign(MethodUtils.methodSign(method));
         rpcRequest.setArgs(args);
 
         RpcResponse rpcResponse = post(rpcRequest);

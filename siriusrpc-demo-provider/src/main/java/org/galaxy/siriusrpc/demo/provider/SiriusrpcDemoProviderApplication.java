@@ -42,7 +42,7 @@ public class SiriusrpcDemoProviderApplication {
     ApplicationRunner providerRun() {
         return x -> {
           RpcRequest request = new RpcRequest();
-          request.setMethod("findById");
+          request.setMethodSign("findById@1_int");
           request.setService("org.galaxy.siriusrpc.demo.api.UserService");
           request.setArgs(new Object[]{100});
           RpcResponse rpcResponse = invoke(request);

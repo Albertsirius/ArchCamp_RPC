@@ -2,7 +2,6 @@ package org.galaxy.siriusrpc.demo.consumer;
 
 import org.galaxy.siriusrpc.core.annotation.SiriusConsumer;
 import org.galaxy.siriusrpc.core.consumer.ConsumerConfig;
-import org.galaxy.siriusrpc.demo.api.Order;
 import org.galaxy.siriusrpc.demo.api.OrderService;
 import org.galaxy.siriusrpc.demo.api.User;
 import org.galaxy.siriusrpc.demo.api.UserService;
@@ -39,12 +38,14 @@ public class SiriusrpcDemoConsumerApplication {
     public ApplicationRunner consumer_runner() {
         return x -> {
             User user = userService.findById(1);
-            System.out.println("RPC result userService.findByid(1) = " + user);
-            Order order = orderService.findById(2);
-            System.out.println("RPC result orderService.findByid(2) = " + order);
+            System.out.println("RPC result userService.findById(1) = " + user);
+            User user2 = userService.findById(1, "aa");
+            System.out.println("RPC result userService.findById(1, \"aa\") = " + user2);
+            //Order order = orderService.findById(2);
+            //System.out.println("RPC result orderService.findByid(2) = " + order);
             //Order order404 = orderService.findById(404);
             //System.out.println("RPC result orderService.findByid(404) = " + order404);
-            demo2.test();
+            //demo2.test();
         };
     }
 }

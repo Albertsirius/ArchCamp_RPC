@@ -5,13 +5,17 @@ import lombok.Data;
 import org.galaxy.siriusrpc.core.annotation.SiriusProvider;
 import org.galaxy.siriusrpc.core.api.RpcRequest;
 import org.galaxy.siriusrpc.core.api.RpcResponse;
+import org.galaxy.siriusrpc.core.meta.ProviderMeta;
+import org.galaxy.siriusrpc.core.util.MethodUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -24,19 +28,16 @@ public class ProviderBootstrap implements ApplicationContextAware {
 
     ApplicationContext applicationContext;
 
-    private Map<String, Object> skeletion = new HashMap<>();
+    private MultiValueMap<String, ProviderMeta> skeletion = new LinkedMultiValueMap<>();
 
     public RpcResponse invoke(RpcRequest request) {
-        String methodName = request.getMethod();
-        if (methodName.equals("toString") || methodName.equals("hashCode")) {
-            return null;
-        }
-
-        Object bean = skeletion.get(request.getService());
+        String methodSign = request.getMethodSign();
+        List<ProviderMeta> providerMetas = skeletion.get(request.getService());
         RpcResponse rpcResponse = new RpcResponse();
         try {
-            Method method = findMethod(bean.getClass(), request.getMethod());
-            Object result = method.invoke(bean, request.getArgs());
+            ProviderMeta providerMeta = findProviderMeta(providerMetas, methodSign);
+            Method method = providerMeta.getMethod();
+            Object result = method.invoke(providerMeta.getServieImpl(), request.getArgs());
             rpcResponse.setStatus(true);
             rpcResponse.setData(result);
         } catch (InvocationTargetException e) {
@@ -50,20 +51,33 @@ public class ProviderBootstrap implements ApplicationContextAware {
         }
     }
 
-    private Method findMethod(Class<?> aClass, String methodName) {
-        Optional<Method> optional = Arrays.stream(aClass.getMethods()).filter(m -> m.getName().equals(methodName))
-                .findFirst();
-        return optional.orElse(null);
+    private ProviderMeta findProviderMeta(List<ProviderMeta> providerMetas, String methodSign) {
+        return providerMetas.stream().filter( x -> x.getMethodSign().equals(methodSign)).findFirst()
+                .orElse(null);
     }
-
 
     @PostConstruct
     public void buildProvider() {
         Map<String, Object> providers = applicationContext.getBeansWithAnnotation(SiriusProvider.class);
         providers.forEach((x, y) -> System.out.println(x));
-        providers.values().forEach( x -> {
-            Class<?> itfer = x.getClass().getInterfaces()[0];
-            skeletion.put(itfer.getCanonicalName(), x);
-        });
+        for (Object object : providers.values()) {
+            Class<?> itfer = object.getClass().getInterfaces()[0];
+            Method[] methods = itfer.getMethods();
+            for (Method method : methods) {
+                if (MethodUtils.checkLocalMethod(method)) {
+                    continue;
+                }
+                createProvider(itfer, object, method);
+            }
+        }
+    }
+
+    private void createProvider(Class<?> itfer, Object object, Method method) {
+        ProviderMeta meta = new ProviderMeta();
+        meta.setMethod(method);
+        meta.setServieImpl(object);
+        meta.setMethodSign(MethodUtils.methodSign(method));
+        System.out.println(" Create a provider: " + meta);
+        skeletion.add(itfer.getCanonicalName(), meta);
     }
 }

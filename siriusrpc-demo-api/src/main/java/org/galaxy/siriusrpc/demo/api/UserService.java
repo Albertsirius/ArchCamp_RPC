@@ -5,7 +5,11 @@ package org.galaxy.siriusrpc.demo.api;
  * @since 2024/3/10
  */
 public interface UserService {
-    User findById(Integer id);
+    User findById(int id);
 
+    User findById(int id, String name);
     int getId(int id);
+    String getName();
+
+    String getName(int id);
 }
