@@ -17,6 +17,13 @@ import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 
@@ -49,17 +56,45 @@ public class SiriusInvocationHandler implements InvocationHandler {
         RpcResponse rpcResponse = post(rpcRequest);
         if (rpcResponse.isStatus()) {
             Object data = rpcResponse.getData();
-            if (data instanceof JSONObject) {
-                JSONObject jsonObject = (JSONObject) data;
-                return jsonObject.toJavaObject(method.getReturnType());
+            Class<?> type = method.getReturnType();
+            if (data instanceof JSONObject jsonResult) {
+                if (Map.class.isAssignableFrom(type)) {
+                    Map resultMap = new HashMap();
+                    Type genericReturnType = method.getGenericReturnType();
+                    if (genericReturnType instanceof ParameterizedType parameterizedType) {
+                        Class<?> keyType = (Class<?>) parameterizedType.getActualTypeArguments()[0];
+                        Class<?> valueType = (Class<?>) parameterizedType.getActualTypeArguments()[1];
+                        jsonResult.entrySet().stream().forEach( e -> {
+                            Object key = TypeUtils.cast(e.getKey(), keyType);
+                            Object value = TypeUtils.cast(e.getValue(), valueType);
+                            resultMap.put(key, value);
+                        });
+                    }
+                    return resultMap;
+                }
+                return jsonResult.toJavaObject(type);
             } else if (data instanceof JSONArray jsonArray){
                 Object[] array = jsonArray.toArray();
-                Class<?> componentType = method.getReturnType().getComponentType();
-                Object returnArray = Array.newInstance(componentType, array.length);
-                for (int i = 0; i< array.length; i++) {
-                    Array.set(returnArray, i, array[i]);
+                if (type.isArray()) {
+                    Class<?> componentType = method.getReturnType().getComponentType();
+                    Object returnArray = Array.newInstance(componentType, array.length);
+                    for (int i = 0; i < array.length; i++) {
+                        Array.set(returnArray, i, array[i]);
+                    }
+                    return returnArray;
+                } else if (List.class.isAssignableFrom(type)) {
+                    List<Object> resultList = new ArrayList<>(array.length);
+                    Type genericeReturnType = method.getGenericReturnType();
+                    if (genericeReturnType instanceof ParameterizedType parameterizedType) {
+                        Type actualType = parameterizedType.getActualTypeArguments()[0];
+                        Arrays.stream(array).forEach(o -> resultList.add(TypeUtils.cast(o, (Class<?>) actualType)));
+                    } else {
+                        resultList.addAll(Arrays.asList(array));
+                    }
+                    return resultList;
+                } else {
+                    return null;
                 }
-                return returnArray;
             } else {
                 return TypeUtils.cast(data, method.getReturnType());
             }
