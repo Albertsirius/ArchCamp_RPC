@@ -1,5 +1,8 @@
 package org.galaxy.siriusrpc.core.consumer;
 
+import org.galaxy.siriusrpc.core.api.LoadBalancer;
+import org.galaxy.siriusrpc.core.api.Router;
+import org.galaxy.siriusrpc.core.cluster.RandomLoadBalancer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
@@ -26,5 +29,16 @@ public class ConsumerConfig {
             System.out.println("consumerBootStrap starting...");
             consumerBootstrap.start();
         };
+    }
+
+    @Bean
+    public LoadBalancer loadBalancer() {
+        //return LoadBalancer.Default;
+        return new RandomLoadBalancer();
+    }
+
+    @Bean
+    public Router router() {
+        return Router.Default;
     }
 }

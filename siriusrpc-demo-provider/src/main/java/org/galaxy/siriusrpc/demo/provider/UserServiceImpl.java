@@ -3,6 +3,8 @@ package org.galaxy.siriusrpc.demo.provider;
 import org.galaxy.siriusrpc.core.annotation.SiriusProvider;
 import org.galaxy.siriusrpc.demo.api.User;
 import org.galaxy.siriusrpc.demo.api.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 /**
@@ -12,9 +14,12 @@ import org.springframework.stereotype.Component;
 @Component
 @SiriusProvider
 public class UserServiceImpl implements UserService {
+
+    @Autowired
+    Environment environment;
     @Override
     public User findById(int id) {
-        return new User(id, "Sirius-" + System.currentTimeMillis());
+        return new User(id, "Sirius-" + environment.getProperty("server.port") + System.currentTimeMillis());
     }
 
     @Override
