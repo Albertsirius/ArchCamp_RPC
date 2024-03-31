@@ -1,9 +1,9 @@
 package org.galaxy.siriusrpc.core.consumer;
 
 import lombok.Data;
-import org.apache.logging.log4j.util.Strings;
 import org.galaxy.siriusrpc.core.annotation.SiriusConsumer;
 import org.galaxy.siriusrpc.core.api.LoadBalancer;
+import org.galaxy.siriusrpc.core.api.RegistryCenter;
 import org.galaxy.siriusrpc.core.api.Router;
 import org.galaxy.siriusrpc.core.api.RpcContext;
 import org.springframework.context.ApplicationContext;
@@ -36,15 +36,14 @@ public class ConsumerBootstrap implements ApplicationContextAware, EnvironmentAw
     public void start() {
         Router router = applicationContext.getBean(Router.class);
         LoadBalancer loadBalancer = applicationContext.getBean(LoadBalancer.class);
+        RegistryCenter registryCenter = applicationContext.getBean(RegistryCenter.class);
         RpcContext context = new RpcContext();
         context.setRouter(router);
         context.setLoadBalancer(loadBalancer);
 
-        String urls = environment.getProperty("siriusrpc.providers","");
-        if(Strings.isEmpty(urls)) {
-            System.out.println("urls are empy");
-        }
-        String[] providers = urls.split(",");
+
+
+
 
         String[] names = applicationContext.getBeanDefinitionNames();
         for (String name : names) {
@@ -55,7 +54,7 @@ public class ConsumerBootstrap implements ApplicationContextAware, EnvironmentAw
                 String serviceName = service.getCanonicalName();
                 Object consumer = stub.get(serviceName);
                 if (Objects.isNull(consumer)) {
-                    consumer = createConsumer(service, context, List.of(providers));
+                    consumer = createFromRegistry(service, context, registryCenter);
                 }
                 f.setAccessible(true);
                 try {
@@ -65,6 +64,12 @@ public class ConsumerBootstrap implements ApplicationContextAware, EnvironmentAw
                 }
             });
         }
+    }
+
+    private Object createFromRegistry(Class<?> service, RpcContext context, RegistryCenter registryCenter) {
+        String serviceName = service.getCanonicalName();
+        List<String> providers = registryCenter.fetchAll(serviceName);
+        return createConsumer(service, context,providers);
     }
 
     private Object createConsumer(Class<?> service, RpcContext context, List<String> providers) {

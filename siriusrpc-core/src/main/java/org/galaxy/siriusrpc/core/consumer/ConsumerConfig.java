@@ -1,13 +1,17 @@
 package org.galaxy.siriusrpc.core.consumer;
 
 import org.galaxy.siriusrpc.core.api.LoadBalancer;
+import org.galaxy.siriusrpc.core.api.RegistryCenter;
 import org.galaxy.siriusrpc.core.api.Router;
 import org.galaxy.siriusrpc.core.cluster.RandomLoadBalancer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+
+import java.util.List;
 
 /**
  * @author AlbertSirius
@@ -16,6 +20,9 @@ import org.springframework.core.annotation.Order;
 
 @Configuration
 public class ConsumerConfig {
+
+    @Value("${siriusrpc.providers")
+    String servers;
 
     @Bean
     public ConsumerBootstrap createConsumerBootstrap() {
@@ -40,5 +47,10 @@ public class ConsumerConfig {
     @Bean
     public Router router() {
         return Router.Default;
+    }
+
+    @Bean(initMethod = "start", destroyMethod = "stop")
+    public RegistryCenter consumer_rc() {
+        return new RegistryCenter.StaticRegistryCenter(List.of(servers.split(",")));
     }
 }
