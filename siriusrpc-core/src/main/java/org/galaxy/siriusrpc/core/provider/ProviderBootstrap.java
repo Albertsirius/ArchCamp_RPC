@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.SneakyThrows;
 import org.galaxy.siriusrpc.core.annotation.SiriusProvider;
 import org.galaxy.siriusrpc.core.api.RegistryCenter;
+import org.galaxy.siriusrpc.core.meta.InstanceMeta;
 import org.galaxy.siriusrpc.core.meta.ProviderMeta;
 import org.galaxy.siriusrpc.core.util.MethodUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,13 +30,11 @@ public class ProviderBootstrap implements ApplicationContextAware {
 
     private MultiValueMap<String, ProviderMeta> skeletion = new LinkedMultiValueMap<>();
 
-    private String instance;
+    private InstanceMeta instance;
     @Value("${server.port}")
     private String port;
 
     private RegistryCenter registryCenter;
-
-
 
     @SneakyThrows
     @PostConstruct
@@ -74,7 +73,7 @@ public class ProviderBootstrap implements ApplicationContextAware {
 
     @SneakyThrows
     public void start() {
-        instance = InetAddress.getLocalHost().getHostAddress() + "_" + port;
+        instance = InstanceMeta.httpInstance(InetAddress.getLocalHost().getHostAddress() , port);
         registryCenter.start();
         skeletion.keySet().forEach(this::registerService);
     }

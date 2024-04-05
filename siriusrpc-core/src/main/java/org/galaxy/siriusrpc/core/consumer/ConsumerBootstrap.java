@@ -6,6 +6,7 @@ import org.galaxy.siriusrpc.core.api.LoadBalancer;
 import org.galaxy.siriusrpc.core.api.RegistryCenter;
 import org.galaxy.siriusrpc.core.api.Router;
 import org.galaxy.siriusrpc.core.api.RpcContext;
+import org.galaxy.siriusrpc.core.meta.InstanceMeta;
 import org.galaxy.siriusrpc.core.registry.ChangedListener;
 import org.galaxy.siriusrpc.core.registry.Event;
 import org.galaxy.siriusrpc.core.util.MethodUtils;
@@ -68,24 +69,18 @@ public class ConsumerBootstrap implements ApplicationContextAware, EnvironmentAw
 
     private Object createFromRegistry(Class<?> service, RpcContext context, RegistryCenter registryCenter) {
         String serviceName = service.getCanonicalName();
-        List<String> providers = mapUrls(registryCenter.fetchAll(serviceName));
+        List<InstanceMeta> providers = registryCenter.fetchAll(serviceName);
         registryCenter.subscribe(serviceName, new ChangedListener() {
             @Override
             public void fire(Event event) {
                 providers.clear();
-                providers.addAll(mapUrls(event.getData()));
+                providers.addAll(event.getData());
             }
         });
         return createConsumer(service, context,providers);
     }
 
-    private List<String> mapUrls(List<String> nodes) {
-        return nodes.stream()
-                .map(x -> "http://" + x.replace("_", ":"))
-                .toList();
-    }
-
-    private Object createConsumer(Class<?> service, RpcContext context, List<String> providers) {
+    private Object createConsumer(Class<?> service, RpcContext context, List<InstanceMeta> providers) {
         return Proxy.newProxyInstance(service.getClassLoader(), new Class[]{service},
                 new SiriusInvocationHandler(service, context, providers));
     }

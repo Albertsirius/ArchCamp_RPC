@@ -8,6 +8,7 @@ import org.apache.curator.framework.recipes.cache.TreeCache;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.zookeeper.CreateMode;
 import org.galaxy.siriusrpc.core.api.RegistryCenter;
+import org.galaxy.siriusrpc.core.meta.InstanceMeta;
 
 import java.util.List;
 
@@ -37,7 +38,7 @@ public class ZkRegistryCenter implements RegistryCenter {
     }
 
     @Override
-    public void register(String service, String instance) {
+    public void register(String service, InstanceMeta instance) {
         String servicePath = "/" + service;
         try {
             // Create persistent node for service
@@ -45,7 +46,7 @@ public class ZkRegistryCenter implements RegistryCenter {
                 client.create().withMode(CreateMode.PERSISTENT).forPath(servicePath, "service".getBytes());
             }
             // create temp node for instance
-            String instancePath = servicePath + "/" + instance;
+            String instancePath = servicePath + "/" + instance.toPath();
             System.out.println(" ===> register to zk: " + instancePath);
             client.create().withMode(CreateMode.EPHEMERAL).forPath(instancePath, "provider".getBytes());
         } catch (Exception e) {
@@ -54,13 +55,13 @@ public class ZkRegistryCenter implements RegistryCenter {
     }
 
     @Override
-    public void unregister(String service, String instance) {
+    public void unregister(String service, InstanceMeta instance) {
         String servicePath = "/" + service;
         try {
             if (client.checkExists().forPath(servicePath) == null) {
                 return;
             }
-            String instancePath = servicePath + "/" + instance;
+            String instancePath = servicePath + "/" + instance.toPath();
             System.out.println(" ===> unregister from zk: " + instancePath);
             client.delete().quietly().forPath(instancePath);
         } catch (Exception e) {
@@ -69,13 +70,16 @@ public class ZkRegistryCenter implements RegistryCenter {
     }
 
     @Override
-    public List<String> fetchAll(String service) {
+    public List<InstanceMeta> fetchAll(String service) {
         String servicePath = "/" + service;
         try {
             List<String> nodes = client.getChildren().forPath(servicePath);
             System.out.println(" ===> fetchAll from zk: " + servicePath);
             nodes.forEach(System.out::println);
-            return nodes;
+            return nodes.stream().map(x -> {
+                String[] strs = x.split("_");
+                return InstanceMeta.httpInstance(strs[0], strs[1]);
+            }).toList();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -91,7 +95,7 @@ public class ZkRegistryCenter implements RegistryCenter {
         cache.getListenable().addListener(
                 (curator, event) -> {
                     System.out.println("zk subscribe event: " + event);
-                    List<String> nodes = fetchAll(service);
+                    List<InstanceMeta> nodes = fetchAll(service);
                     listener.fire(new Event(nodes));
                 }
         );

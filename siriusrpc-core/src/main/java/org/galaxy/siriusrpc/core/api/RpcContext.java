@@ -1,6 +1,7 @@
 package org.galaxy.siriusrpc.core.api;
 
 import lombok.Data;
+import org.galaxy.siriusrpc.core.meta.InstanceMeta;
 
 import java.util.List;
 
@@ -11,7 +12,7 @@ import java.util.List;
 
 @Data
 public class RpcContext {
-    private Router router;
-    private LoadBalancer loadBalancer;
+    private Router<InstanceMeta> router;
+    private LoadBalancer<InstanceMeta> loadBalancer;
     private List<Filter> filters;
 }

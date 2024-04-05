@@ -2,6 +2,7 @@ package org.galaxy.siriusrpc.core.registry;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.galaxy.siriusrpc.core.meta.InstanceMeta;
 
 import java.util.List;
 
@@ -14,5 +15,5 @@ import java.util.List;
 @AllArgsConstructor
 public class Event {
 
-    List<String> data;
+    List<InstanceMeta> data;
 }

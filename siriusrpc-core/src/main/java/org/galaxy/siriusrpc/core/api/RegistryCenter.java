@@ -1,5 +1,6 @@
 package org.galaxy.siriusrpc.core.api;
 
+import org.galaxy.siriusrpc.core.meta.InstanceMeta;
 import org.galaxy.siriusrpc.core.registry.ChangedListener;
 
 import java.util.List;
@@ -13,19 +14,19 @@ public interface RegistryCenter {
 
     void stop();
 
-    void register(String service, String instance);
+    void register(String service, InstanceMeta instance);
 
-    void unregister(String service, String instance);
+    void unregister(String service, InstanceMeta instance);
 
-    List<String> fetchAll(String service);
+    List<InstanceMeta> fetchAll(String service);
 
     void subscribe(String service, ChangedListener listener);
 
     class StaticRegistryCenter implements RegistryCenter {
 
-        List<String> providers;
+        List<InstanceMeta> providers;
 
-        public StaticRegistryCenter(List<String> providers) {
+        public StaticRegistryCenter(List<InstanceMeta> providers) {
             this.providers = providers;
         }
 
@@ -40,17 +41,17 @@ public interface RegistryCenter {
         }
 
         @Override
-        public void register(String service, String instance) {
+        public void register(String service, InstanceMeta instance) {
 
         }
 
         @Override
-        public void unregister(String service, String instance) {
+        public void unregister(String service, InstanceMeta instance) {
 
         }
 
         @Override
-        public List<String> fetchAll(String service) {
+        public List<InstanceMeta> fetchAll(String service) {
             return providers;
         }
 
