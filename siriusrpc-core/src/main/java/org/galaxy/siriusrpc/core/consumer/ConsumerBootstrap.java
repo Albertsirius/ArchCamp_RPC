@@ -8,6 +8,7 @@ import org.galaxy.siriusrpc.core.api.Router;
 import org.galaxy.siriusrpc.core.api.RpcContext;
 import org.galaxy.siriusrpc.core.registry.ChangedListener;
 import org.galaxy.siriusrpc.core.registry.Event;
+import org.galaxy.siriusrpc.core.util.MethodUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.EnvironmentAware;
@@ -43,14 +44,10 @@ public class ConsumerBootstrap implements ApplicationContextAware, EnvironmentAw
         context.setRouter(router);
         context.setLoadBalancer(loadBalancer);
 
-
-
-
-
         String[] names = applicationContext.getBeanDefinitionNames();
         for (String name : names) {
             Object bean = applicationContext.getBean(name); //SiriusrpcDemoConsumerApplication这个bean被增强，实际是子类。如果下面的getDeclaredFields方法获取不了属于父类的属性。
-            List<Field> fields = findAnnotatedField(bean.getClass());
+            List<Field> fields = MethodUtils.findAnnotatedField(bean.getClass(), SiriusConsumer.class);
             fields.stream().forEach( f -> {
                 Class<?> service = f.getType();
                 String serviceName = service.getCanonicalName();
@@ -91,21 +88,6 @@ public class ConsumerBootstrap implements ApplicationContextAware, EnvironmentAw
         return Proxy.newProxyInstance(service.getClassLoader(), new Class[]{service},
                 new SiriusInvocationHandler(service, context, providers));
     }
-
-    private List<Field> findAnnotatedField(Class<?> aClass) {
-        List<Field> result = new ArrayList<>();
-        while (Objects.nonNull(aClass)) {
-            Field[] fields = aClass.getDeclaredFields();
-            for (Field f : fields) {
-                if (f.isAnnotationPresent(SiriusConsumer.class)) {
-                    result.add(f);
-                }
-            }
-            aClass = aClass.getSuperclass();
-        }
-        return result;
-    }
-
 
     @Override
     public void setEnvironment(Environment environment) {
