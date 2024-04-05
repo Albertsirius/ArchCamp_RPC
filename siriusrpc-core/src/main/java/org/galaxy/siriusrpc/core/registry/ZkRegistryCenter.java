@@ -10,6 +10,7 @@ import org.apache.zookeeper.CreateMode;
 import org.galaxy.siriusrpc.core.api.RegistryCenter;
 import org.galaxy.siriusrpc.core.meta.InstanceMeta;
 import org.galaxy.siriusrpc.core.meta.ServiceMeta;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.List;
 
@@ -19,16 +20,22 @@ import java.util.List;
  */
 public class ZkRegistryCenter implements RegistryCenter {
 
+    @Value("${siriusrpc:zkServer")
+    private String server;
+
+    @Value("${siriusrpc:zkRoot")
+    private String root;
+
     private CuratorFramework client;
     @Override
     public void start() {
         RetryPolicy retryPolicy = new ExponentialBackoffRetry(1000, 3);
         client = CuratorFrameworkFactory.builder()
-                .connectString("localhost:2181")
-                .namespace("siriusrpc")
+                .connectString(server)
+                .namespace(root)
                 .retryPolicy(retryPolicy)
                 .build();
-        System.out.println(" ===> zk client starting.");
+        System.out.println(" ===> zk client starting to server [" + server + "/" + root + "].");
         client.start();
     }
 
