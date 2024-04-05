@@ -1,13 +1,17 @@
 package org.galaxy.siriusrpc.core.provider;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import lombok.Data;
+import lombok.SneakyThrows;
 import org.galaxy.siriusrpc.core.annotation.SiriusProvider;
+import org.galaxy.siriusrpc.core.api.RegistryCenter;
 import org.galaxy.siriusrpc.core.api.RpcRequest;
 import org.galaxy.siriusrpc.core.api.RpcResponse;
 import org.galaxy.siriusrpc.core.meta.ProviderMeta;
 import org.galaxy.siriusrpc.core.util.MethodUtils;
 import org.galaxy.siriusrpc.core.util.TypeUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.util.LinkedMultiValueMap;
@@ -15,6 +19,7 @@ import org.springframework.util.MultiValueMap;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.InetAddress;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -29,6 +34,10 @@ public class ProviderBootstrap implements ApplicationContextAware {
     ApplicationContext applicationContext;
 
     private MultiValueMap<String, ProviderMeta> skeletion = new LinkedMultiValueMap<>();
+
+    private String instance;
+    @Value("${server.port}")
+    private String port;
 
     public RpcResponse invoke(RpcRequest request) {
         String methodSign = request.getMethodSign();
@@ -66,8 +75,9 @@ public class ProviderBootstrap implements ApplicationContextAware {
                 .orElse(null);
     }
 
+    @SneakyThrows
     @PostConstruct
-    public void buildProvider() {
+    public void init() {
         Map<String, Object> providers = applicationContext.getBeansWithAnnotation(SiriusProvider.class);
         providers.forEach((x, y) -> System.out.println(x));
         for (Object object : providers.values()) {
@@ -91,5 +101,26 @@ public class ProviderBootstrap implements ApplicationContextAware {
         meta.setMethodSign(MethodUtils.methodSign(method));
         System.out.println(" Create a provider: " + meta);
         skeletion.add(itfer.getCanonicalName(), meta);
+    }
+
+    private void registerService(String service) {
+        RegistryCenter registryCenter = applicationContext.getBean(RegistryCenter.class);
+        registryCenter.register(service, instance);
+    }
+
+    @SneakyThrows
+    public void start() {
+        instance = InetAddress.getLocalHost().getHostAddress() + "_" + port;
+        skeletion.keySet().forEach(this::registerService);
+    }
+
+    @PreDestroy
+    public void stop() {
+        skeletion.keySet().forEach(this::unregisterService);
+    }
+
+    private void unregisterService(String service) {
+        RegistryCenter registryCenter = applicationContext.getBean(RegistryCenter.class);
+        registryCenter.unregister(service, instance);
     }
 }

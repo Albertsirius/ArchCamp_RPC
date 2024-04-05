@@ -32,7 +32,12 @@ public class TypeUtils {
             Class<?> compontType = type.getComponentType();
             Object resultArray = Array.newInstance(compontType, length);
             for (int i = 0; i < length; i++) {
-                Array.set(resultArray, i, Array.get(origin, i));
+                if (compontType.isPrimitive() || compontType.getPackageName().startsWith("java")) {
+                    Array.set(resultArray, i, Array.get(origin, i));
+                } else {
+                    Object castObject = cast(Array.get(origin, i), compontType);
+                    Array.set(resultArray, i, castObject);
+                }
             }
             return resultArray;
         }
