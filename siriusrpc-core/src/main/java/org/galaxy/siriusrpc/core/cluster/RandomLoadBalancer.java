@@ -3,7 +3,6 @@ package org.galaxy.siriusrpc.core.cluster;
 import org.galaxy.siriusrpc.core.api.LoadBalancer;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 

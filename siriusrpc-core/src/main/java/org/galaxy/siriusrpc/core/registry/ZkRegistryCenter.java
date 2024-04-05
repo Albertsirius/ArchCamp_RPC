@@ -26,11 +26,13 @@ public class ZkRegistryCenter implements RegistryCenter {
                 .namespace("siriusrpc")
                 .retryPolicy(retryPolicy)
                 .build();
+        System.out.println(" ===> zk client starting.");
         client.start();
     }
 
     @Override
     public void stop() {
+        System.out.println(" ===> zk client stopped.");
         client.close();
     }
 
@@ -44,6 +46,7 @@ public class ZkRegistryCenter implements RegistryCenter {
             }
             // create temp node for instance
             String instancePath = servicePath + "/" + instance;
+            System.out.println(" ===> register to zk: " + instancePath);
             client.create().withMode(CreateMode.EPHEMERAL).forPath(instancePath, "provider".getBytes());
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -58,6 +61,7 @@ public class ZkRegistryCenter implements RegistryCenter {
                 return;
             }
             String instancePath = servicePath + "/" + instance;
+            System.out.println(" ===> unregister from zk: " + instancePath);
             client.delete().quietly().forPath(instancePath);
         } catch (Exception e) {
             throw new RuntimeException(e);
