@@ -1,4 +1,4 @@
-package org.galaxy.siriusrpc.core.consumer;
+package org.galaxy.siriusrpc.core.consumer.http;
 
 import org.galaxy.siriusrpc.core.api.RpcRequest;
 import org.galaxy.siriusrpc.core.api.RpcResponse;
