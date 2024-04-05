@@ -4,6 +4,7 @@ import org.galaxy.siriusrpc.core.api.LoadBalancer;
 import org.galaxy.siriusrpc.core.api.RegistryCenter;
 import org.galaxy.siriusrpc.core.api.Router;
 import org.galaxy.siriusrpc.core.cluster.RandomLoadBalancer;
+import org.galaxy.siriusrpc.core.registry.ZkRegistryCenter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationRunner;
@@ -51,6 +52,6 @@ public class ConsumerConfig {
 
     @Bean(initMethod = "start", destroyMethod = "stop")
     public RegistryCenter consumer_rc() {
-        return new RegistryCenter.StaticRegistryCenter(List.of(servers.split(",")));
+        return new ZkRegistryCenter();
     }
 }

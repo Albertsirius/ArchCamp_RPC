@@ -68,7 +68,9 @@ public class ConsumerBootstrap implements ApplicationContextAware, EnvironmentAw
 
     private Object createFromRegistry(Class<?> service, RpcContext context, RegistryCenter registryCenter) {
         String serviceName = service.getCanonicalName();
-        List<String> providers = registryCenter.fetchAll(serviceName);
+        List<String> providers = registryCenter.fetchAll(serviceName)
+                .stream().map(x -> "http://" + x.replace("_", ":"))
+                .toList();
         return createConsumer(service, context,providers);
     }
 
