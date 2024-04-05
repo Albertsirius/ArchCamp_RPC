@@ -7,9 +7,11 @@ import org.galaxy.siriusrpc.core.api.RegistryCenter;
 import org.galaxy.siriusrpc.core.api.Router;
 import org.galaxy.siriusrpc.core.api.RpcContext;
 import org.galaxy.siriusrpc.core.meta.InstanceMeta;
+import org.galaxy.siriusrpc.core.meta.ServiceMeta;
 import org.galaxy.siriusrpc.core.registry.ChangedListener;
 import org.galaxy.siriusrpc.core.registry.Event;
 import org.galaxy.siriusrpc.core.util.MethodUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.EnvironmentAware;
@@ -17,7 +19,6 @@ import org.springframework.core.env.Environment;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Proxy;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,9 +38,16 @@ public class ConsumerBootstrap implements ApplicationContextAware, EnvironmentAw
 
     private Map<String, Object> stub = new HashMap<>();
 
+    @Value("${app.id}")
+    private String app;
+    @Value("${app.namespace}")
+    private String namespace;
+    @Value("${app.env}")
+    private String env;
+
     public void start() {
-        Router router = applicationContext.getBean(Router.class);
-        LoadBalancer loadBalancer = applicationContext.getBean(LoadBalancer.class);
+        Router<InstanceMeta> router = applicationContext.getBean(Router.class);
+        LoadBalancer<InstanceMeta> loadBalancer = applicationContext.getBean(LoadBalancer.class);
         RegistryCenter registryCenter = applicationContext.getBean(RegistryCenter.class);
         RpcContext context = new RpcContext();
         context.setRouter(router);
@@ -68,9 +76,11 @@ public class ConsumerBootstrap implements ApplicationContextAware, EnvironmentAw
     }
 
     private Object createFromRegistry(Class<?> service, RpcContext context, RegistryCenter registryCenter) {
-        String serviceName = service.getCanonicalName();
-        List<InstanceMeta> providers = registryCenter.fetchAll(serviceName);
-        registryCenter.subscribe(serviceName, new ChangedListener() {
+        ServiceMeta serviceMeta = ServiceMeta.builder()
+                .app(app).namespace(namespace).env(env).name(service.getCanonicalName()).
+                build();
+        List<InstanceMeta> providers = registryCenter.fetchAll(serviceMeta);
+        registryCenter.subscribe(serviceMeta, new ChangedListener() {
             @Override
             public void fire(Event event) {
                 providers.clear();

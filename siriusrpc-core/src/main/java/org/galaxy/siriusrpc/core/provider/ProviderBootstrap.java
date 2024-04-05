@@ -8,6 +8,7 @@ import org.galaxy.siriusrpc.core.annotation.SiriusProvider;
 import org.galaxy.siriusrpc.core.api.RegistryCenter;
 import org.galaxy.siriusrpc.core.meta.InstanceMeta;
 import org.galaxy.siriusrpc.core.meta.ProviderMeta;
+import org.galaxy.siriusrpc.core.meta.ServiceMeta;
 import org.galaxy.siriusrpc.core.util.MethodUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
@@ -33,6 +34,13 @@ public class ProviderBootstrap implements ApplicationContextAware {
     private InstanceMeta instance;
     @Value("${server.port}")
     private String port;
+
+    @Value("${app.id}")
+    private String app;
+    @Value("${app.namespace}")
+    private String namespace;
+    @Value("${app.env}")
+    private String env;
 
     private RegistryCenter registryCenter;
 
@@ -68,7 +76,9 @@ public class ProviderBootstrap implements ApplicationContextAware {
     }
 
     private void registerService(String service) {
-        registryCenter.register(service, instance);
+        ServiceMeta serviceMeta = ServiceMeta.builder()
+                .app(app).namespace(namespace).env(env).name(service).build();
+        registryCenter.register(serviceMeta, instance);
     }
 
     @SneakyThrows
@@ -86,6 +96,8 @@ public class ProviderBootstrap implements ApplicationContextAware {
     }
 
     private void unregisterService(String service) {
-        registryCenter.unregister(service, instance);
+        ServiceMeta serviceMeta = ServiceMeta.builder()
+                .app(app).namespace(namespace).env(env).name(service).build();
+        registryCenter.unregister(serviceMeta, instance);
     }
 }
