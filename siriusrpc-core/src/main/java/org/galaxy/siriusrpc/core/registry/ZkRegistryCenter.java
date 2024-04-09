@@ -13,6 +13,7 @@ import org.galaxy.siriusrpc.core.meta.ServiceMeta;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author AlbertSirius
@@ -20,10 +21,10 @@ import java.util.List;
  */
 public class ZkRegistryCenter implements RegistryCenter {
 
-    @Value("${siriusrpc:zkServer")
+    @Value("${siriusrpc.zkServer}")
     private String server;
 
-    @Value("${siriusrpc:zkRoot")
+    @Value("${siriusrpc.zkRoot}")
     private String root;
 
     private CuratorFramework client;
@@ -87,7 +88,7 @@ public class ZkRegistryCenter implements RegistryCenter {
             return nodes.stream().map(x -> {
                 String[] strs = x.split("_");
                 return InstanceMeta.httpInstance(strs[0], strs[1]);
-            }).toList();
+            }).collect(Collectors.toList());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

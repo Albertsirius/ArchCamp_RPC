@@ -2,7 +2,7 @@ server:
   port: 8088
 siriusrpc:
   providers: http://localhost:8081,http://localhost:8082
-  zkServer: localhost:2182
+  zkServer: localhost:2181
   zkRoot: siriusrpc
 
 app:

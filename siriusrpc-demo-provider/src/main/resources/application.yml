@@ -6,6 +6,6 @@ app:
   namespace: public
   env: dev
 
-sirriusrpc:
-  zkServer: localhost:2182
+siriusrpc:
+  zkServer: localhost:2181
   zkRoot: siriusrpc
