@@ -9,3 +9,8 @@ app:
 siriusrpc:
   zkServer: localhost:2181
   zkRoot: siriusrpc
+
+logging:
+  level:
+    root: info
+    org.galaxy.siriusrpc: info

@@ -1,5 +1,6 @@
 package org.galaxy.siriusrpc.core.consumer;
 
+import lombok.extern.slf4j.Slf4j;
 import org.galaxy.siriusrpc.core.api.LoadBalancer;
 import org.galaxy.siriusrpc.core.api.RegistryCenter;
 import org.galaxy.siriusrpc.core.api.Router;
@@ -20,6 +21,7 @@ import java.util.List;
  */
 
 @Configuration
+@Slf4j
 public class ConsumerConfig {
 
     @Value("${siriusrpc.providers")
@@ -34,7 +36,7 @@ public class ConsumerConfig {
     @Order(Integer.MIN_VALUE) //多个ApplicationRunner，这个先执行
     public ApplicationRunner consumerBootstrap_runner(@Autowired ConsumerBootstrap consumerBootstrap) {
         return x -> {
-            System.out.println("consumerBootStrap starting...");
+            log.info("consumerBootStrap starting...");
             consumerBootstrap.start();
         };
     }

@@ -5,12 +5,14 @@ import org.galaxy.siriusrpc.core.consumer.ConsumerConfig;
 import org.galaxy.siriusrpc.demo.api.OrderService;
 import org.galaxy.siriusrpc.demo.api.User;
 import org.galaxy.siriusrpc.demo.api.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Arrays;
 
@@ -20,17 +22,24 @@ import java.util.Arrays;
  */
 
 @SpringBootApplication
+@RestController
 @Import({ConsumerConfig.class})
 public class SiriusrpcDemoConsumerApplication {
 
     @SiriusConsumer
     UserService userService;
 
-    @SiriusConsumer
-    OrderService orderService;
+/*    @SiriusConsumer
+    OrderService orderService;*/
 
-    @Autowired
-    Demo2 demo2;
+ /*   @Autowired
+    Demo2 demo2;*/
+
+    @RequestMapping("/")
+    public User findById(@RequestParam("id")int id) {
+        return userService.findById(id);
+    }
+
 
     public static void main(String[] args) {
         SpringApplication.run(SiriusrpcDemoConsumerApplication.class);

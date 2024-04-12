@@ -1,6 +1,7 @@
 package org.galaxy.siriusrpc.core.consumer.http;
 
 import com.alibaba.fastjson.JSON;
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.ConnectionPool;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -8,7 +9,6 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import org.galaxy.siriusrpc.core.api.RpcRequest;
 import org.galaxy.siriusrpc.core.api.RpcResponse;
-import org.galaxy.siriusrpc.core.consumer.http.HttpInvoker;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -17,6 +17,7 @@ import java.util.concurrent.TimeUnit;
  * @author AlbertSirius
  * @since 2024/4/5
  */
+@Slf4j
 public class OkhttpInvoker implements HttpInvoker {
 
     final static MediaType JSONTYPE = MediaType.get("application/json; charset=utf-8");
@@ -35,14 +36,14 @@ public class OkhttpInvoker implements HttpInvoker {
     @Override
     public RpcResponse<?> post(RpcRequest rpcRequest, String url) {
         String reqJson = JSON.toJSONString(rpcRequest);
-        System.out.println(" ===> reqJson = " + reqJson);
+        log.debug(" ===> reqJson = " + reqJson);
         Request request = new Request.Builder()
                 .url(url)
                 .post(RequestBody.create(reqJson, JSONTYPE))
                 .build();
         try {
             String resp = client.newCall(request).execute().body().string();
-            System.out.println(" ===> respJson = " + resp);
+            log.debug(" ===> respJson = " + resp);
             return JSON.parseObject(resp, RpcResponse.class);
         } catch (IOException e) {
             throw new RuntimeException(e);

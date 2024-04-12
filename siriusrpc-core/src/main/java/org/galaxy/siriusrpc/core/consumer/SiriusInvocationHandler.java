@@ -1,5 +1,6 @@
 package org.galaxy.siriusrpc.core.consumer;
 
+import lombok.extern.slf4j.Slf4j;
 import org.galaxy.siriusrpc.core.api.RpcContext;
 import org.galaxy.siriusrpc.core.api.RpcRequest;
 import org.galaxy.siriusrpc.core.api.RpcResponse;
@@ -18,6 +19,7 @@ import java.util.List;
  * @author AlbertSirius
  * @since 2024/3/17
  */
+@Slf4j
 public class SiriusInvocationHandler implements InvocationHandler {
     Class<?> service;
     RpcContext context;
@@ -46,7 +48,7 @@ public class SiriusInvocationHandler implements InvocationHandler {
 
         List<InstanceMeta> instances = context.getRouter().rout(providers);
         InstanceMeta instance = context.getLoadBalancer().choose(instances);
-        System.out.println("loadBalancer.choose(urls) ===> " + instance.toUrl());
+        log.debug("loadBalancer.choose(urls) ===> " + instance.toUrl());
         RpcResponse<?> rpcResponse = httpInvoker.post(rpcRequest, instance.toUrl());
         if (rpcResponse.isStatus()) {
             Object data = rpcResponse.getData();

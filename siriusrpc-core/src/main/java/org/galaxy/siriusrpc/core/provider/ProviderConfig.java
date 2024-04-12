@@ -1,5 +1,6 @@
 package org.galaxy.siriusrpc.core.provider;
 
+import lombok.extern.slf4j.Slf4j;
 import org.galaxy.siriusrpc.core.api.RegistryCenter;
 import org.galaxy.siriusrpc.core.registry.ZkRegistryCenter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.core.annotation.Order;
  * @since 2024/3/10
  */
 @Configuration
+@Slf4j
 public class ProviderConfig {
 
     @Bean
@@ -34,9 +36,9 @@ public class ProviderConfig {
     @Order(Integer.MIN_VALUE)
     public ApplicationRunner providerBootstrap_runner(@Autowired ProviderBootstrap providerBootstrap) {
         return x -> {
-            System.out.println("providerBootstrap starting ...");
+            log.info("providerBootstrap starting ...");
             providerBootstrap.start();
-            System.out.println("providerBootstrap started ...");
+            log.info("providerBootstrap started ...");
         };
     }
 

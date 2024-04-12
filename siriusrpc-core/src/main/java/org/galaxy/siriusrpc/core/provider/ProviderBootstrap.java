@@ -4,6 +4,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import lombok.Data;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.galaxy.siriusrpc.core.annotation.SiriusProvider;
 import org.galaxy.siriusrpc.core.api.RegistryCenter;
 import org.galaxy.siriusrpc.core.meta.InstanceMeta;
@@ -25,6 +26,7 @@ import java.util.Map;
  * @since 2024/3/10
  */
 @Data
+@Slf4j
 public class ProviderBootstrap implements ApplicationContextAware {
 
     ApplicationContext applicationContext;
@@ -51,7 +53,7 @@ public class ProviderBootstrap implements ApplicationContextAware {
 
         registryCenter = applicationContext.getBean(RegistryCenter.class);
 
-        providers.forEach((x, y) -> System.out.println(x));
+        providers.forEach((x, y) -> log.info(x));
         for (Object object : providers.values()) {
             Class<?>[] services = object.getClass().getInterfaces();
             for (Class<?> service : services) {
@@ -71,7 +73,7 @@ public class ProviderBootstrap implements ApplicationContextAware {
                 .servieImpl(object).methodSign(MethodUtils.methodSign(method))
                 .method(method)
                 .build();
-        System.out.println(" Create a provider: " + meta);
+        log.info(" Create a provider: " + meta);
         skeletion.add(service.getCanonicalName(), meta);
     }
 
@@ -90,7 +92,7 @@ public class ProviderBootstrap implements ApplicationContextAware {
 
     @PreDestroy
     public void stop() {
-        System.out.println(" ===> unreg all services.");
+        log.info(" ===> unreg all services.");
         skeletion.keySet().forEach(this::unregisterService);
         registryCenter.stop();
     }
