@@ -1,10 +1,12 @@
 package org.galaxy.siriusrpc.core.consumer;
 
 import lombok.extern.slf4j.Slf4j;
+import org.galaxy.siriusrpc.core.api.Filter;
 import org.galaxy.siriusrpc.core.api.LoadBalancer;
 import org.galaxy.siriusrpc.core.api.RegistryCenter;
 import org.galaxy.siriusrpc.core.api.Router;
 import org.galaxy.siriusrpc.core.cluster.RandomLoadBalancer;
+import org.galaxy.siriusrpc.core.filter.CacheFilter;
 import org.galaxy.siriusrpc.core.registry.ZkRegistryCenter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -55,5 +57,10 @@ public class ConsumerConfig {
     @Bean(initMethod = "start", destroyMethod = "stop")
     public RegistryCenter consumer_rc() {
         return new ZkRegistryCenter();
+    }
+
+    @Bean
+    public Filter filter() {
+        return new CacheFilter();
     }
 }
