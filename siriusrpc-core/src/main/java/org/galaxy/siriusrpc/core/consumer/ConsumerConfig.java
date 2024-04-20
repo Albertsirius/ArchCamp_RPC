@@ -7,6 +7,7 @@ import org.galaxy.siriusrpc.core.api.RegistryCenter;
 import org.galaxy.siriusrpc.core.api.Router;
 import org.galaxy.siriusrpc.core.cluster.RandomLoadBalancer;
 import org.galaxy.siriusrpc.core.filter.CacheFilter;
+import org.galaxy.siriusrpc.core.filter.MockFilter;
 import org.galaxy.siriusrpc.core.registry.ZkRegistryCenter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -60,7 +61,12 @@ public class ConsumerConfig {
     }
 
     @Bean
-    public Filter filter() {
+    public Filter filter1() {
         return new CacheFilter();
+    }
+
+    @Bean
+    public Filter filter2() {
+        return new MockFilter();
     }
 }
