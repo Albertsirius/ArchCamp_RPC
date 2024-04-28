@@ -5,6 +5,7 @@ import org.galaxy.siriusrpc.core.api.Filter;
 import org.galaxy.siriusrpc.core.api.RpcContext;
 import org.galaxy.siriusrpc.core.api.RpcRequest;
 import org.galaxy.siriusrpc.core.api.RpcResponse;
+import org.galaxy.siriusrpc.core.api.SiriusRpcException;
 import org.galaxy.siriusrpc.core.consumer.http.HttpInvoker;
 import org.galaxy.siriusrpc.core.consumer.http.OkhttpInvoker;
 import org.galaxy.siriusrpc.core.meta.InstanceMeta;
@@ -75,13 +76,16 @@ public class SiriusInvocationHandler implements InvocationHandler {
     }
 
     @Nullable
-    private static Object castReturnResult(Method method, RpcResponse<?> rpcResponse) throws Exception {
+    private static Object castReturnResult(Method method, RpcResponse<?> rpcResponse) {
         if (rpcResponse.isStatus()) {
-            Object data = rpcResponse.getData();
-            return TypeUtils.castMethodResult(method, data);
+            return TypeUtils.castMethodResult(method, rpcResponse.getData());
         } else {
             Exception exception = rpcResponse.getEx();
-            throw exception;
+            if (exception instanceof SiriusRpcException ex) {
+                throw ex;
+            } else {
+                throw new SiriusRpcException(rpcResponse.getEx(), SiriusRpcException.NoSuchMethodEx);
+            }
         }
     }
 }
