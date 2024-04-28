@@ -7,25 +7,25 @@ import lombok.Data;
  * @since 2024/4/26
  */
 @Data
-public class SiriusRpcException extends RuntimeException {
+public class RpcException extends RuntimeException {
 
     private String errCode;
-    public SiriusRpcException() {
+    public RpcException() {
     }
 
-    public SiriusRpcException(String message) {
+    public RpcException(String message) {
         super(message);
     }
 
-    public SiriusRpcException(String message, Throwable cause) {
+    public RpcException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public SiriusRpcException(Throwable cause) {
+    public RpcException(Throwable cause) {
         super(cause);
     }
 
-    public SiriusRpcException(Throwable cause, String errCode) {
+    public RpcException(Throwable cause, String errCode) {
         super(cause);
         this.errCode = errCode;
     }

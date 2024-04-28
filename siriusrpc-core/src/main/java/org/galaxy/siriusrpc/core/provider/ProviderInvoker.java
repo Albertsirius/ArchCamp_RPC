@@ -2,7 +2,7 @@ package org.galaxy.siriusrpc.core.provider;
 
 import org.galaxy.siriusrpc.core.api.RpcRequest;
 import org.galaxy.siriusrpc.core.api.RpcResponse;
-import org.galaxy.siriusrpc.core.api.SiriusRpcException;
+import org.galaxy.siriusrpc.core.api.RpcException;
 import org.galaxy.siriusrpc.core.meta.ProviderMeta;
 import org.galaxy.siriusrpc.core.util.TypeUtils;
 import org.springframework.util.MultiValueMap;
@@ -37,10 +37,10 @@ public class ProviderInvoker {
             rpcResponse.setData(result);
         } catch (InvocationTargetException e) {
             rpcResponse.setStatus(false);
-            rpcResponse.setEx(new SiriusRpcException(e.getTargetException().getMessage()));
+            rpcResponse.setEx(new RpcException(e.getTargetException().getMessage()));
         } catch (IllegalAccessException e) {
             rpcResponse.setStatus(false);
-            rpcResponse.setEx(new SiriusRpcException(e.getMessage()));
+            rpcResponse.setEx(new RpcException(e.getMessage()));
         }
         return rpcResponse;
     }

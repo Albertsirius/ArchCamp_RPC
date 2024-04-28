@@ -9,7 +9,7 @@ import org.apache.curator.framework.recipes.cache.TreeCache;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.zookeeper.CreateMode;
 import org.galaxy.siriusrpc.core.api.RegistryCenter;
-import org.galaxy.siriusrpc.core.api.SiriusRpcException;
+import org.galaxy.siriusrpc.core.api.RpcException;
 import org.galaxy.siriusrpc.core.meta.InstanceMeta;
 import org.galaxy.siriusrpc.core.meta.ServiceMeta;
 import org.springframework.beans.factory.annotation.Value;
@@ -63,7 +63,7 @@ public class ZkRegistryCenter implements RegistryCenter {
             log.info(" ===> register to zk: " + instancePath);
             client.create().withMode(CreateMode.EPHEMERAL).forPath(instancePath, "provider".getBytes());
         } catch (Exception e) {
-            throw new SiriusRpcException(e);
+            throw new RpcException(e);
         }
     }
 
@@ -78,7 +78,7 @@ public class ZkRegistryCenter implements RegistryCenter {
             log.info(" ===> unregister from zk: " + instancePath);
             client.delete().quietly().forPath(instancePath);
         } catch (Exception e) {
-            throw new SiriusRpcException(e);
+            throw new RpcException(e);
         }
     }
 
@@ -94,7 +94,7 @@ public class ZkRegistryCenter implements RegistryCenter {
                 return InstanceMeta.httpInstance(strs[0], strs[1]);
             }).collect(Collectors.toList());
         } catch (Exception e) {
-            throw new SiriusRpcException(e);
+            throw new RpcException(e);
         }
     }
 
