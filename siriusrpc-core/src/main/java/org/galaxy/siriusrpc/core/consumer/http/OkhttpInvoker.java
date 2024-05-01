@@ -10,7 +10,6 @@ import okhttp3.RequestBody;
 import org.galaxy.siriusrpc.core.api.RpcRequest;
 import org.galaxy.siriusrpc.core.api.RpcResponse;
 
-import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 /**

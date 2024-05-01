@@ -42,7 +42,7 @@ public class SiriusInvocationHandler implements InvocationHandler {
     }
 
     @Override
-    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+    public Object invoke(Object proxy, Method method, Object[] args) {
 
         if (MethodUtils.checkLocalMethod(method.getName())) {
             return null;

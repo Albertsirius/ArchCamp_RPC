@@ -2,7 +2,6 @@ package org.galaxy.siriusrpc.demo.consumer;
 
 import org.galaxy.siriusrpc.core.annotation.SiriusConsumer;
 import org.galaxy.siriusrpc.core.consumer.ConsumerConfig;
-import org.galaxy.siriusrpc.demo.api.OrderService;
 import org.galaxy.siriusrpc.demo.api.User;
 import org.galaxy.siriusrpc.demo.api.UserService;
 import org.springframework.boot.ApplicationRunner;
