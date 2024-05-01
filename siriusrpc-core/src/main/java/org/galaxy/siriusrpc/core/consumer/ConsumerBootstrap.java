@@ -1,6 +1,7 @@
 package org.galaxy.siriusrpc.core.consumer;
 
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.galaxy.siriusrpc.core.annotation.SiriusConsumer;
 import org.galaxy.siriusrpc.core.api.Filter;
 import org.galaxy.siriusrpc.core.api.LoadBalancer;
@@ -9,8 +10,6 @@ import org.galaxy.siriusrpc.core.api.Router;
 import org.galaxy.siriusrpc.core.api.RpcContext;
 import org.galaxy.siriusrpc.core.meta.InstanceMeta;
 import org.galaxy.siriusrpc.core.meta.ServiceMeta;
-import org.galaxy.siriusrpc.core.registry.ChangedListener;
-import org.galaxy.siriusrpc.core.registry.Event;
 import org.galaxy.siriusrpc.core.util.MethodUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
@@ -31,6 +30,7 @@ import java.util.Objects;
  */
 
 @Data
+@Slf4j
 public class ConsumerBootstrap implements ApplicationContextAware, EnvironmentAware {
 
     private ApplicationContext applicationContext;
@@ -66,7 +66,7 @@ public class ConsumerBootstrap implements ApplicationContextAware, EnvironmentAw
         for (String name : names) {
             Object bean = applicationContext.getBean(name); //SiriusrpcDemoConsumerApplication这个bean被增强，实际是子类。如果下面的getDeclaredFields方法获取不了属于父类的属性。
             List<Field> fields = MethodUtils.findAnnotatedField(bean.getClass(), SiriusConsumer.class);
-            fields.stream().forEach( f -> {
+            fields.forEach(f -> {
                 Class<?> service = f.getType();
                 String serviceName = service.getCanonicalName();
                 Object consumer = stub.get(serviceName);
@@ -78,7 +78,7 @@ public class ConsumerBootstrap implements ApplicationContextAware, EnvironmentAw
                 try {
                     f.set(bean, consumer);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    log.error(e.getMessage());
                 }
             });
         }
@@ -89,12 +89,9 @@ public class ConsumerBootstrap implements ApplicationContextAware, EnvironmentAw
                 .app(app).namespace(namespace).env(env).name(service.getCanonicalName()).
                 build();
         List<InstanceMeta> providers = registryCenter.fetchAll(serviceMeta);
-        registryCenter.subscribe(serviceMeta, new ChangedListener() {
-            @Override
-            public void fire(Event event) {
-                providers.clear();
-                providers.addAll(event.getData());
-            }
+        registryCenter.subscribe(serviceMeta, event -> {
+            providers.clear();
+            providers.addAll(event.getData());
         });
         return createConsumer(service, context,providers);
     }
