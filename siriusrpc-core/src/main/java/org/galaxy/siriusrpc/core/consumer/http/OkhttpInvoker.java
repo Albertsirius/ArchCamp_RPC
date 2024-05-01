@@ -24,7 +24,7 @@ public class OkhttpInvoker implements HttpInvoker {
 
     private OkHttpClient client;
 
-    public OkhttpInvoker() {
+    public OkhttpInvoker(int timeout) {
         this.client = new OkHttpClient.Builder()
                 .connectionPool(new ConnectionPool(16, 60, TimeUnit.SECONDS))
                 .readTimeout(1, TimeUnit.SECONDS)
@@ -45,7 +45,7 @@ public class OkhttpInvoker implements HttpInvoker {
             String resp = client.newCall(request).execute().body().string();
             log.debug(" ===> respJson = " + resp);
             return JSON.parseObject(resp, RpcResponse.class);
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }

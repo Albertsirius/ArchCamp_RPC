@@ -15,6 +15,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.net.SocketTimeoutException;
 import java.util.List;
 import java.util.Objects;
 
@@ -29,13 +30,15 @@ public class SiriusInvocationHandler implements InvocationHandler {
     RpcContext context;
     List<InstanceMeta> providers;
 
-    HttpInvoker httpInvoker = new OkhttpInvoker();
+    HttpInvoker httpInvoker;
 
 
     public SiriusInvocationHandler(Class<?> clazz, RpcContext context, List<InstanceMeta> providers) {
         this.service = clazz;
         this.context = context;
         this.providers = providers;
+        int timeout = Integer.parseInt(context.getParameters().getOrDefault("app.timeout", "1000"));
+        this.httpInvoker = new OkhttpInvoker(timeout);
     }
 
     @Override
@@ -50,29 +53,40 @@ public class SiriusInvocationHandler implements InvocationHandler {
         rpcRequest.setMethodSign(MethodUtils.methodSign(method));
         rpcRequest.setArgs(args);
 
-        for (Filter filter : this.context.getFilters()) {
-            Object preResult = filter.preFilter(rpcRequest);
-            if (Objects.nonNull(preResult)) {
-                log.info(filter.getClass().getName() + " ===> preFilter: " + preResult);
-                return preResult;
+        int retries = Integer.parseInt(context.getParameters().getOrDefault("app.retries", "1"));
+        while (retries -- > 0) {
+            log.info(" ===> retries: " + retries);
+            try {
+                for (Filter filter : this.context.getFilters()) {
+                    Object preResult = filter.preFilter(rpcRequest);
+                    if (Objects.nonNull(preResult)) {
+                        log.info(filter.getClass().getName() + " ===> preFilter: " + preResult);
+                        return preResult;
+                    }
+                }
+
+                List<InstanceMeta> instances = context.getRouter().rout(providers);
+                InstanceMeta instance = context.getLoadBalancer().choose(instances);
+                log.debug("loadBalancer.choose(urls) ===> " + instance.toUrl());
+                RpcResponse<?> rpcResponse = httpInvoker.post(rpcRequest, instance.toUrl());
+                Object result = castReturnResult(method, rpcResponse);
+                for (Filter filter : this.context.getFilters()) {
+                    Object filterResult = filter.postFilter(rpcRequest, rpcResponse, result);
+                    if (Objects.nonNull(filterResult)) {
+                        return filterResult;
+                    } else {
+                        result = filterResult;
+                    }
+
+                }
+                return result;
+            } catch (Exception ex) {
+                if (!(ex.getCause()  instanceof SocketTimeoutException)) {
+                    throw ex;
+                }
             }
         }
-
-        List<InstanceMeta> instances = context.getRouter().rout(providers);
-        InstanceMeta instance = context.getLoadBalancer().choose(instances);
-        log.debug("loadBalancer.choose(urls) ===> " + instance.toUrl());
-        RpcResponse<?> rpcResponse = httpInvoker.post(rpcRequest, instance.toUrl());
-        Object result = castReturnResult(method, rpcResponse);
-        for (Filter filter : this.context.getFilters()) {
-            Object filterResult = filter.postFilter(rpcRequest, rpcResponse, result);
-            if (Objects.nonNull(filterResult)) {
-                return filterResult;
-            }else {
-                result = filterResult;
-            }
-        }
-
-        return result;
+        return null;
     }
 
     @Nullable

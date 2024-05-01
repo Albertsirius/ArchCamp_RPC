@@ -45,6 +45,10 @@ public class ConsumerBootstrap implements ApplicationContextAware, EnvironmentAw
     private String namespace;
     @Value("${app.env}")
     private String env;
+    @Value("${app.retries")
+    private int retries;
+    @Value("${app.timeout")
+    private int timeout;
 
     public void start() {
         Router<InstanceMeta> router = applicationContext.getBean(Router.class);
@@ -56,6 +60,7 @@ public class ConsumerBootstrap implements ApplicationContextAware, EnvironmentAw
         context.setRouter(router);
         context.setLoadBalancer(loadBalancer);
         context.setFilters(filters);
+        context.getParameters().put("app.retires", String.valueOf(retries));
 
         String[] names = applicationContext.getBeanDefinitionNames();
         for (String name : names) {

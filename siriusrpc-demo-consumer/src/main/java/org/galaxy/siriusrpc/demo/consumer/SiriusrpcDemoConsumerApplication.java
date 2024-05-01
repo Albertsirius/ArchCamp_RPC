@@ -49,21 +49,25 @@ public class SiriusrpcDemoConsumerApplication {
     public ApplicationRunner consumer_runner() {
         return x -> {
 
-            System.out.println("userService.getId(new User(100, \"HZH\")) = " + userService.getId(new User(100, "HZH")));
-            //User user = userService.findById(1);
-            //System.out.println("RPC result userService.findById(1) = " + user);
-            //User user2 = userService.findById(1, "aa");
-            //System.out.println("RPC result userService.findById(1, \"aa\") = " + user2);
-            //Order order = orderService.findById(2);
-            //System.out.println("RPC result orderService.findByid(2) = " + order);
-            //Order order404 = orderService.findById(404);
-            //System.out.println("RPC result orderService.findByid(404) = " + order404);
-            //demo2.test();
-            System.out.println(" ===> userService.getLongIds()");
-            Arrays.stream(userService.getLongIds()).forEach(System.out::println);
-
-            System.out.println(" ===> userService.getIds(int[])");
-            Arrays.stream(userService.getIds(new int[]{4,5,6})).forEach(System.out::println);
+            //testAll();
         };
+    }
+
+    private void testAll() {
+        System.out.println("userService.getId(new User(100, \"HZH\")) = " + userService.getId(new User(100, "HZH")));
+        //User user = userService.findById(1);
+        //System.out.println("RPC result userService.findById(1) = " + user);
+        //User user2 = userService.findById(1, "aa");
+        //System.out.println("RPC result userService.findById(1, \"aa\") = " + user2);
+        //Order order = orderService.findById(2);
+        //System.out.println("RPC result orderService.findByid(2) = " + order);
+        //Order order404 = orderService.findById(404);
+        //System.out.println("RPC result orderService.findByid(404) = " + order404);
+        //demo2.test();
+        System.out.println(" ===> userService.getLongIds()");
+        Arrays.stream(userService.getLongIds()).forEach(System.out::println);
+
+        System.out.println(" ===> userService.getIds(int[])");
+        Arrays.stream(userService.getIds(new int[]{4,5,6})).forEach(System.out::println);
     }
 }

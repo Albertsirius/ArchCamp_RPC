@@ -20,4 +20,6 @@ public interface UserService {
     long[] getLongIds();
 
     int[] getIds(int[] ids);
+
+    User find(int timeout);
 }
