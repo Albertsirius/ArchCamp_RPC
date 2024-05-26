@@ -22,4 +22,6 @@ public interface UserService {
     int[] getIds(int[] ids);
 
     User find(int timeout);
+
+    void setTimeoutPorts(String timeoutPorts);
 }

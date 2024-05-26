@@ -5,6 +5,7 @@ import org.galaxy.siriusrpc.core.api.RpcResponse;
 import org.galaxy.siriusrpc.core.provider.ProviderBootstrap;
 import org.galaxy.siriusrpc.core.provider.ProviderConfig;
 import org.galaxy.siriusrpc.core.provider.ProviderInvoker;
+import org.galaxy.siriusrpc.demo.api.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
@@ -13,6 +14,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -28,15 +30,25 @@ public class SiriusrpcDemoProviderApplication {
     @Autowired
     private ProviderInvoker providerInvoker;
 
+    @Autowired
+    private UserService userService;
+
     public static void main(String[] args) {
         SpringApplication.run(SiriusrpcDemoProviderApplication.class);
     }
 
     @RequestMapping("/")
     public RpcResponse<Object> invoke(@RequestBody RpcRequest request) {
-
         return providerInvoker.invoke(request);
+    }
 
+    @RequestMapping("/ports")
+    public RpcResponse<String> ports(@RequestParam("ports") String ports) {
+        userService.setTimeoutPorts(ports);
+        RpcResponse<String> response = new RpcResponse<>();
+        response.setStatus(true);
+        response.setData("OK: " + ports);
+        return response;
     }
 
     @Bean

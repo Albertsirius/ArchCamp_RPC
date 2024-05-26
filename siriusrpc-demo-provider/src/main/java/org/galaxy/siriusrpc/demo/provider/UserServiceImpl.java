@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
+
 /**
  * @author AlbertSirius
  * @since 2024/3/10
@@ -62,10 +64,16 @@ public class UserServiceImpl implements UserService {
         return ids;
     }
 
+    String timeoutPorts = "8081,8094";
+
+    public void setTimeoutPorts(String timeoutPorts) {
+        this.timeoutPorts = timeoutPorts;
+    }
+
     @Override
     public User find(int timeout) {
         String port = environment.getProperty("server.port");
-        if ("8081".equals(port)) {
+        if (Arrays.stream(timeoutPorts.split(",")).anyMatch(port::equals)) {
             try {
                 Thread.sleep(timeout);
             } catch (InterruptedException e) {
@@ -74,4 +82,6 @@ public class UserServiceImpl implements UserService {
         }
         return new User(1001, "Sirius001-" + port);
     }
+
+
 }
