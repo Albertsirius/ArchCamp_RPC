@@ -5,6 +5,7 @@ app:
   id: app1
   namespace: public
   env: dev
+  metas: "{gray: 'false', dc: 'bj', unit: 'B001'}"
 
 siriusrpc:
   zkServer: localhost:2181
@@ -12,5 +13,5 @@ siriusrpc:
 
 logging:
   level:
-    root: info
+    root: error
     org.galaxy.siriusrpc: info

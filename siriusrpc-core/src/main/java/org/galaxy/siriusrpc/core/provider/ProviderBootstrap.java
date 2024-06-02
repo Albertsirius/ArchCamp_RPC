@@ -43,6 +43,8 @@ public class ProviderBootstrap implements ApplicationContextAware {
     private String namespace;
     @Value("${app.env}")
     private String env;
+    @Value("#{${app.meta}}")
+    private Map<String, String> metas;
 
     private RegistryCenter registryCenter;
 

@@ -1,9 +1,11 @@
 package org.galaxy.siriusrpc.core.meta;
 
+import com.alibaba.fastjson.JSON;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -21,7 +23,7 @@ public class InstanceMeta {
     private Integer port;
     private String context;
     private boolean status; //online or offline
-    private Map<String, String> parameters;
+    private Map<String, String> parameters = new HashMap<>();
 
     public String toPath() {
         return String.format("%s_%d", host, port);
@@ -40,5 +42,9 @@ public class InstanceMeta {
 
     public String toUrl() {
         return String.format("%s://%s:%d/%s", schema, host, port, context);
+    }
+
+    public String toMetas() {
+        return JSON.toJSONString(this.getParameters());
     }
 }
