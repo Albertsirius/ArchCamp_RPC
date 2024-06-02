@@ -58,7 +58,7 @@ public class ZkRegistryCenter implements RegistryCenter {
         try {
             // Create persistent node for service
             if (client.checkExists().forPath(servicePath) == null) {
-                client.create().withMode(CreateMode.PERSISTENT).forPath(servicePath, "service".getBytes());
+                client.create().withMode(CreateMode.PERSISTENT).forPath(servicePath, service.toMetas().getBytes());
             }
             // create temp node for instance
             String instancePath = servicePath + "/" + instance.toPath();
