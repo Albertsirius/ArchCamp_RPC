@@ -5,6 +5,7 @@ import org.galaxy.siriusrpc.core.api.Filter;
 import org.galaxy.siriusrpc.core.api.LoadBalancer;
 import org.galaxy.siriusrpc.core.api.RegistryCenter;
 import org.galaxy.siriusrpc.core.api.Router;
+import org.galaxy.siriusrpc.core.cluster.GrayRouter;
 import org.galaxy.siriusrpc.core.cluster.RandomLoadBalancer;
 import org.galaxy.siriusrpc.core.filter.CacheFilter;
 import org.galaxy.siriusrpc.core.filter.MockFilter;
@@ -27,6 +28,8 @@ public class ConsumerConfig {
 
     @Value("${siriusrpc.providers")
     String servers;
+    @Value("${app.grayRatio}")
+    private int grayRatio;
 
     @Bean
     public ConsumerBootstrap createConsumerBootstrap() {
@@ -50,7 +53,7 @@ public class ConsumerConfig {
 
     @Bean
     public Router router() {
-        return Router.Default;
+        return new GrayRouter(grayRatio);
     }
 
     @Bean(initMethod = "start", destroyMethod = "stop")
@@ -58,7 +61,7 @@ public class ConsumerConfig {
         return new ZkRegistryCenter();
     }
 
-    @Bean
+   /* @Bean
     public Filter filter1() {
         return new CacheFilter();
     }
@@ -66,5 +69,5 @@ public class ConsumerConfig {
     @Bean
     public Filter filter2() {
         return new MockFilter();
-    }
+    }*/
 }

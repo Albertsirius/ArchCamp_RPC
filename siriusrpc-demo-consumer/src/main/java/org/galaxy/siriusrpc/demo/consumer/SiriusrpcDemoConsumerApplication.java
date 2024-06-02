@@ -1,9 +1,12 @@
 package org.galaxy.siriusrpc.demo.consumer;
 
 import org.galaxy.siriusrpc.core.annotation.SiriusConsumer;
+import org.galaxy.siriusrpc.core.api.Router;
+import org.galaxy.siriusrpc.core.cluster.GrayRouter;
 import org.galaxy.siriusrpc.core.consumer.ConsumerConfig;
 import org.galaxy.siriusrpc.demo.api.User;
 import org.galaxy.siriusrpc.demo.api.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -34,13 +37,27 @@ public class SiriusrpcDemoConsumerApplication {
  /*   @Autowired
     Demo2 demo2;*/
 
-    @RequestMapping("/")
+    @RequestMapping("/api/")
     public User findById(@RequestParam("id")int id) {
         return userService.findById(id);
     }
 
+    @RequestMapping("/find/")
+    public User find(@RequestParam("timeout")int timeout) {
+        return userService.find(timeout);
+    }
+
+    @Autowired
+    Router router;
+
+    @RequestMapping("/gray")
+    public String gray(@RequestParam("ratio") int ratio) { //留个后门设置Rati
+        ((GrayRouter)router).setGrayRatio(ratio);
+        return "OK-new gray ratio is " + ratio;
+    }
 
     public static void main(String[] args) {
+
         SpringApplication.run(SiriusrpcDemoConsumerApplication.class);
     }
 
